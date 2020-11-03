@@ -1,109 +1,55 @@
 import React from 'react';
-import InputField from './inputField';
-import SubmitButton from './SubmitButton';
-import UserStore from '../stores/UserStore';
+import Axios from 'axios';
 
-class LoginForm extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            username: '',
-            password: '',
-            buttonDisabled: false
-        }
+export default class LoginForm extends React.Component {
+constructor(props) {
+    super(props);
+    this.state = {
+        password: '',
+        username: ''
     }
 
-    setInputValue(property, val) {
-        val = val.trim();
-        if (val.length > 12) {
-            return;
-        }
+}
+    handleUsername = (event) => {
+        this.setState({ 
+            username: event.target.value
+        });
+    };
+    handlePassword = (event) => {
         this.setState({
-            [property]: val
-        })
-    }
+            password: event.target.value 
+        });
+    };
+    handleSubmit = (event) => {
+        event.preventDefault();
 
-    resetForm() {
-        this.setState({
-            username: '',
-            password: '',
-            buttonDisabled: false
-        })
-    }
+        const user = {
+            password: this.state.password,
+            username: this.state.username
 
-    async doLogin() {
-
-        if (!this.state.username) {
-            return;
-        }
-
-        if (!this.state.password) {
-            return;
-        }
-        this.setState({
-            buttonDisabled: true
-        })
-
-        try {
-
-            var res = await fetch('/login', {
-                method: 'post',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: this.state.username,
-                    password: this.state.password,
-                })
-            });
-
-            var result = await res.json();
-            if (result && result.success) {
-                UserStore.isLoggedIn = true;
-                UserStore.username = result.username;
-            }
-
-            else if (result && result.success === false) {
-                this.resetForm();
-                alert(result.msg)
-            }
-
-        }
-        catch (e) {
-            console.log(e);
-            this.resetForm();
-        }
-
+        };
+        Axios.post('http://localhost:9191/addUser', user)
+            .then(res => {
+                console.log(res);
+                console.log(res.data);
+            })
     }
 
     render() {
         return (
             <div className="loginForm">
-                
-                Log in
-                <InputField
-                    type='text'
-                    placeholder='Username'
-                    value={this.state.username ? this.state.username : ''}
-                    onChange={ (val) => this.setInputValue('username', val) }
+                <form onSubmit={this.handleSubmit}>
+                <input
+                    placeholder="Username" value={this.state.username}
+                    onChange={this.handleUsername} required
                 />
-
-                <InputField
-                    type='password'
-                    placeholder='Password'
-                    value={this.state.password ? this.state.password : ''}
-                    onChange={ (val) => this.setInputValue('password', val) }
+                <input
+                    placeholder="Password" value={this.state.password}
+                    onChange={this.handlePassword} required
                 />
-
-                <SubmitButton
-                   text='Login'
-                   disabled={this.state.buttonDisabled}
-                   onClick={ () => this.doLogin()}                
-                />
+                    <button type="submit">Register</button>
+                </form>
             </div>
         );
     }
 }
-export default LoginForm;
