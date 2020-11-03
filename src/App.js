@@ -1,26 +1,105 @@
 import React from 'react';
-import logo from './logo.svg';
+import { observer } from 'mobx-react';
+import UserStore from './stores/UserStore';
+import LoginForm from './Account/LoginForm';
+import SubmitButton from './Account/SubmitButton';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+class App extends React.Component {
 
-export default App;
+  async componentDidMount() {
+
+    try {
+
+      var res = await fetch('/isLoggedIn', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      var result = await res.json();
+
+      if (result && result.success) {
+        UserStore.loading = false;
+        UserStore.isLoggedIn = true;
+        UserStore.username = result.username;
+      }
+
+      else {
+        UserStore.loading = false;
+        UserStore.isLoggedIn = false;
+      }
+    } catch (e) {
+      UserStore.loading = false;
+      UserStore.isLoggedIn = false;
+    }
+  }
+
+  async doLogout() {
+    try {
+
+      var res = await fetch('/logout', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          
+        }
+      });
+
+      var result = await res.json();
+
+      if (result && result.success) {
+        UserStore.isLoggedIn = false;
+        UserStore.username = '';
+      }
+
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+
+  render() {
+
+    if (UserStore.loading) {
+      return (
+        <div className="app">
+          <div className="container">
+            Loading, please wait..
+          </div>
+        </div>
+      );
+    }
+
+    else {
+
+      if (UserStore.isLoggedIn) {
+        return (
+          <div className="app">
+            <div className="container">
+              Welcome {UserStore.username}
+
+              <SubmitButton
+                text={'Log out'}
+                  disabled={false}
+                  onClick={() => this, this.doLogout()}
+              />
+            </div>
+          </div>
+        );
+      }
+    }
+
+    return (
+      <div className="app">
+        <div className="container">
+          <LoginForm />
+        </div>
+      </div>
+    );
+  }
+}
+//make observer to listen to changes in Userstore
+export default observer(App);
