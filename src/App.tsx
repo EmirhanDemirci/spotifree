@@ -6,6 +6,7 @@ import LoginForm from "./Account/components/LoginForm";
 import ProfilePage from "./Account/components/ProfilePage";
 import GuardedRoute from "./GuardedRoute";
 import NotGuardedRoute from "./NotGuardedRoute";
+import AlbumPage from "./Account/components/AlbumPage";
 
 const App: React.FC = () => {
   return (
@@ -28,6 +29,12 @@ const App: React.FC = () => {
           isAuthenticated={localStorage.getItem("user")}
           exact
           component={ProfilePage}
+        />
+        <GuardedRoute
+          path="/albums"
+          isAuthenticated={localStorage.getItem("user")}
+          exact
+          component={AlbumPage}
         />
         <Route path="/" render={() => <div>404</div>} />
       </Switch>

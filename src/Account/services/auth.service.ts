@@ -39,6 +39,7 @@ class AuthService {
   getCurrentUser() {
     var parsedJson = JSON.parse(localStorage.getItem("user") || "{}");
     var user = new User(jwt_decode(parsedJson));
+    console.log(user);
     console.log(user.claim.sub);
     var request = axios.get(API_URL + "getUser/" + user.claim.sub, {
       headers: {
